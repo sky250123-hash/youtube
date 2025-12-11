@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { analyzeTranscript, generateScript } from './services/geminiService';
 import { AppStep, AnalysisResponse, ScriptResponse } from './types';
+import { ApiKeyInput } from './components/ApiKeyInput';
 import { InputSection } from './components/InputSection';
 import { TopicSelector } from './components/TopicSelector';
 import { ResultDisplay } from './components/ResultDisplay';
 
 const App: React.FC = () => {
   const [step, setStep] = useState<AppStep>(AppStep.INPUT);
+  const [apiKey, setApiKey] = useState<string>('');
   const [transcript, setTranscript] = useState<string>('');
   const [analysisResult, setAnalysisResult] = useState<AnalysisResponse | null>(null);
   const [scriptResult, setScriptResult] = useState<ScriptResponse | null>(null);
@@ -19,12 +21,12 @@ const App: React.FC = () => {
     setTranscript(inputTranscript);
     
     try {
-      const data = await analyzeTranscript(inputTranscript);
+      const data = await analyzeTranscript(apiKey, inputTranscript);
       setAnalysisResult(data);
       setStep(AppStep.TOPIC_SELECTION);
     } catch (err: any) {
       console.error(err);
-      setErrorMsg("대본 분석에 실패했습니다. 내용을 확인하고 다시 시도해주세요.");
+      setErrorMsg(err.message || "대본 분석에 실패했습니다. 내용을 확인하고 다시 시도해주세요.");
       setStep(AppStep.ERROR);
     }
   };
@@ -35,12 +37,12 @@ const App: React.FC = () => {
     setErrorMsg(null);
     
     try {
-      const data = await generateScript(transcript, topic);
+      const data = await generateScript(apiKey, transcript, topic);
       setScriptResult(data);
       setStep(AppStep.RESULT);
     } catch (err: any) {
       console.error(err);
-      setErrorMsg("대본 생성에 실패했습니다. 잠시 후 다시 시도해주세요.");
+      setErrorMsg(err.message || "대본 생성에 실패했습니다. 잠시 후 다시 시도해주세요.");
       setStep(AppStep.ERROR); // Or stay on TOPIC_SELECTION and show inline error? Simplified to ERROR for now.
     }
   };
@@ -79,8 +81,8 @@ const App: React.FC = () => {
         <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gray-800 via-gray-900 to-black opacity-40 pointer-events-none"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-8 relative z-10 text-center">
           <div className="inline-flex items-center justify-center p-2 bg-gray-800 rounded-full mb-4 border border-gray-700 shadow-sm">
-            <span className="bg-gradient-to-r from-rose-500 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">Beta</span>
-            <span className="ml-2 text-gray-400 text-xs font-medium pr-2">Gemini 2.5 Flash 기반</span>
+            <span className="bg-gradient-to-r from-rose-500 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">무료</span>
+            <span className="ml-2 text-gray-400 text-xs font-medium pr-2">Gemini 1.5 Flash</span>
           </div>
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-white mb-4">
             Viral Script <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-400 to-orange-400">Cloner</span>
@@ -94,6 +96,9 @@ const App: React.FC = () => {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+        
+        {/* API Key Input - Always visible at top */}
+        <ApiKeyInput onApiKeyChange={setApiKey} />
         
         {step === AppStep.ERROR && (
           <div className="max-w-4xl mx-auto mb-8 bg-red-500/10 border border-red-500 text-red-400 p-4 rounded-xl text-center flex flex-col items-center gap-4">

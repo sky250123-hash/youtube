@@ -1,31 +1,6 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { AnalysisResponse, ScriptResponse } from "../types";
 
-const getApiKey = () => {
-  // Vite에서는 import.meta.env 사용
-  if (typeof import.meta !== 'undefined' && import.meta.env) {
-    return import.meta.env.VITE_GEMINI_API_KEY;
-  }
-  // fallback for process.env (Node.js 환경)
-  if (typeof process !== 'undefined' && process.env) {
-    return process.env.GEMINI_API_KEY || process.env.API_KEY;
-  }
-  return '';
-};
-
-const apiKey = getApiKey();
-
-if (!apiKey) {
-  console.error(
-    '⚠️ API Key가 설정되지 않았습니다!\n' +
-    '1. 프로젝트 루트에 .env 파일을 생성하세요\n' +
-    '2. GEMINI_API_KEY=your_api_key_here 를 추가하세요\n' +
-    '3. https://ai.google.dev/gemini-api/docs/api-key 에서 API 키를 발급받으세요'
-  );
-}
-
-const ai = new GoogleGenAI({ apiKey });
-
 const ANALYSIS_SYSTEM_INSTRUCTION = `
 You are an expert YouTube Script Consultant.
 Your goal is to deconstruct viral videos to understand WHY they work, and then suggest new topics that would fit that specific successful formula.
@@ -40,12 +15,12 @@ You must strictly follow the original's pacing, hook style, tone, and transition
 Language: Korean (Hangul).
 `;
 
-export const analyzeTranscript = async (transcript: string): Promise<AnalysisResponse> => {
-  if (!apiKey) {
-    throw new Error(
-      'API 키가 설정되지 않았습니다. .env 파일에 GEMINI_API_KEY를 설정해주세요.'
-    );
+export const analyzeTranscript = async (apiKey: string, transcript: string): Promise<AnalysisResponse> => {
+  if (!apiKey || !apiKey.trim()) {
+    throw new Error('⚠️ API 키를 입력해주세요. 오른쪽 상단의 API Key 설정에서 설정할 수 있습니다.');
   }
+
+  const ai = new GoogleGenAI({ apiKey });
 
   const prompt = `
     Analyze this Viral YouTube Transcript:
@@ -63,7 +38,7 @@ export const analyzeTranscript = async (transcript: string): Promise<AnalysisRes
   `;
 
   const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
+    model: "gemini-1.5-flash",
     contents: prompt,
     config: {
       systemInstruction: ANALYSIS_SYSTEM_INSTRUCTION,
@@ -105,12 +80,12 @@ export const analyzeTranscript = async (transcript: string): Promise<AnalysisRes
   return JSON.parse(response.text) as AnalysisResponse;
 };
 
-export const generateScript = async (originalTranscript: string, topic: string): Promise<ScriptResponse> => {
-  if (!apiKey) {
-    throw new Error(
-      'API 키가 설정되지 않았습니다. .env 파일에 GEMINI_API_KEY를 설정해주세요.'
-    );
+export const generateScript = async (apiKey: string, originalTranscript: string, topic: string): Promise<ScriptResponse> => {
+  if (!apiKey || !apiKey.trim()) {
+    throw new Error('⚠️ API 키를 입력해주세요. 오른쪽 상단의 API Key 설정에서 설정할 수 있습니다.');
   }
+
+  const ai = new GoogleGenAI({ apiKey });
 
   const prompt = `
     Original Viral Transcript (Template):
@@ -132,7 +107,7 @@ export const generateScript = async (originalTranscript: string, topic: string):
   `;
 
   const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
+    model: "gemini-1.5-flash",
     contents: prompt,
     config: {
       systemInstruction: GENERATION_SYSTEM_INSTRUCTION,
