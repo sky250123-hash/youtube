@@ -21,6 +21,7 @@ export const analyzeTranscript = async (apiKey: string, transcript: string): Pro
   }
 
   const ai = new GoogleGenAI({ apiKey });
+  const model = ai.model("gemini-pro");
 
   const prompt = `
 You are an expert YouTube Script Consultant. Your goal is to deconstruct viral videos to understand WHY they work.
@@ -49,16 +50,11 @@ Output JSON with this schema:
 }
 `;
 
-  const result = await ai.generateContent({
-    model: "gemini-pro",
-    contents: [{ role: 'user', parts: [{ text: prompt }] }],
-    generationConfig: {
-      responseMimeType: "application/json",
-    }
-  });
-
-  if (!result.text) throw new Error("No response from Gemini");
-  return JSON.parse(result.text) as AnalysisResponse;
+  const result = await model.generateContent(prompt);
+  const response = await result.response;
+  
+  if (!response.text()) throw new Error("No response from Gemini");
+  return JSON.parse(response.text()) as AnalysisResponse;
 };
 
 export const generateScript = async (apiKey: string, originalTranscript: string, topic: string): Promise<ScriptResponse> => {
@@ -67,6 +63,7 @@ export const generateScript = async (apiKey: string, originalTranscript: string,
   }
 
   const ai = new GoogleGenAI({ apiKey });
+  const model = ai.model("gemini-pro");
 
   const prompt = `
 You are a creative YouTube Scriptwriter. Your task is to take a "New Topic" and write a script by cloning the structural formula of an "Original Transcript".
@@ -104,14 +101,9 @@ Output JSON with this schema:
 }
 `;
 
-  const result = await ai.generateContent({
-    model: "gemini-pro",
-    contents: [{ role: 'user', parts: [{ text: prompt }] }],
-    generationConfig: {
-      responseMimeType: "application/json",
-    }
-  });
-
-  if (!result.text) throw new Error("No response from Gemini");
-  return JSON.parse(result.text) as ScriptResponse;
+  const result = await model.generateContent(prompt);
+  const response = await result.response;
+  
+  if (!response.text()) throw new Error("No response from Gemini");
+  return JSON.parse(response.text()) as ScriptResponse;
 };
