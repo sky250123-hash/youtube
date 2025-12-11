@@ -38,7 +38,7 @@ export const analyzeTranscript = async (apiKey: string, transcript: string): Pro
   `;
 
   const response = await ai.models.generateContent({
-    model: "models/gemini-1.5-flash",
+    model: "gemini-1.5-flash",
     contents: prompt,
     config: {
       systemInstruction: ANALYSIS_SYSTEM_INSTRUCTION,
@@ -107,7 +107,7 @@ export const generateScript = async (apiKey: string, originalTranscript: string,
   `;
 
   const response = await ai.models.generateContent({
-    model: "models/gemini-1.5-flash",
+    model: "gemini-1.5-flash",
     contents: prompt,
     config: {
       systemInstruction: GENERATION_SYSTEM_INSTRUCTION,
