@@ -22,7 +22,7 @@ export const analyzeTranscript = async (apiKey: string, transcript: string): Pro
 
   const ai = new GoogleGenAI({ apiKey });
   const model = ai.getGenerativeModel({ 
-    model: "gemini-1.5-flash",
+    model: "gemini-pro",
     systemInstruction: ANALYSIS_SYSTEM_INSTRUCTION,
   });
 
@@ -70,7 +70,7 @@ export const generateScript = async (apiKey: string, originalTranscript: string,
 
   const ai = new GoogleGenAI({ apiKey });
   const model = ai.getGenerativeModel({ 
-    model: "gemini-1.5-flash",
+    model: "gemini-pro",
     systemInstruction: GENERATION_SYSTEM_INSTRUCTION,
   });
 
