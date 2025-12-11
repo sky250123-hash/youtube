@@ -1,7 +1,19 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { AnalysisResponse, ScriptResponse } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const getApiKey = () => {
+  // Vite에서는 import.meta.env 사용
+  if (typeof import.meta !== 'undefined' && import.meta.env) {
+    return import.meta.env.VITE_GEMINI_API_KEY;
+  }
+  // fallback for process.env (Node.js 환경)
+  if (typeof process !== 'undefined' && process.env) {
+    return process.env.GEMINI_API_KEY || process.env.API_KEY;
+  }
+  return '';
+};
+
+const ai = new GoogleGenAI({ apiKey: getApiKey() });
 
 const ANALYSIS_SYSTEM_INSTRUCTION = `
 You are an expert YouTube Script Consultant.
