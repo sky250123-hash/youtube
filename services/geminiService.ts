@@ -13,7 +13,18 @@ const getApiKey = () => {
   return '';
 };
 
-const ai = new GoogleGenAI({ apiKey: getApiKey() });
+const apiKey = getApiKey();
+
+if (!apiKey) {
+  console.error(
+    '⚠️ API Key가 설정되지 않았습니다!\n' +
+    '1. 프로젝트 루트에 .env 파일을 생성하세요\n' +
+    '2. GEMINI_API_KEY=your_api_key_here 를 추가하세요\n' +
+    '3. https://ai.google.dev/gemini-api/docs/api-key 에서 API 키를 발급받으세요'
+  );
+}
+
+const ai = new GoogleGenAI({ apiKey });
 
 const ANALYSIS_SYSTEM_INSTRUCTION = `
 You are an expert YouTube Script Consultant.
@@ -30,6 +41,12 @@ Language: Korean (Hangul).
 `;
 
 export const analyzeTranscript = async (transcript: string): Promise<AnalysisResponse> => {
+  if (!apiKey) {
+    throw new Error(
+      'API 키가 설정되지 않았습니다. .env 파일에 GEMINI_API_KEY를 설정해주세요.'
+    );
+  }
+
   const prompt = `
     Analyze this Viral YouTube Transcript:
     """
@@ -89,6 +106,12 @@ export const analyzeTranscript = async (transcript: string): Promise<AnalysisRes
 };
 
 export const generateScript = async (originalTranscript: string, topic: string): Promise<ScriptResponse> => {
+  if (!apiKey) {
+    throw new Error(
+      'API 키가 설정되지 않았습니다. .env 파일에 GEMINI_API_KEY를 설정해주세요.'
+    );
+  }
+
   const prompt = `
     Original Viral Transcript (Template):
     """
