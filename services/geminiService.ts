@@ -21,7 +21,7 @@ export const analyzeTranscript = async (apiKey: string, transcript: string): Pro
   }
 
   const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+  const model = genAI.getGenerativeModel("gemini-pro");
 
   const prompt = `
 You are an expert YouTube Script Consultant. Your goal is to deconstruct viral videos to understand WHY they work.
@@ -63,7 +63,7 @@ export const generateScript = async (apiKey: string, originalTranscript: string,
   }
 
   const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+  const model = genAI.getGenerativeModel("gemini-pro");
 
   const prompt = `
 You are a creative YouTube Scriptwriter. Your task is to take a "New Topic" and write a script by cloning the structural formula of an "Original Transcript".
