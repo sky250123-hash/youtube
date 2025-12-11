@@ -21,46 +21,44 @@ export const analyzeTranscript = async (apiKey: string, transcript: string): Pro
   }
 
   const ai = new GoogleGenAI({ apiKey });
-  const model = ai.getGenerativeModel({ 
-    model: "gemini-pro",
-    systemInstruction: ANALYSIS_SYSTEM_INSTRUCTION,
-  });
 
   const prompt = `
-    Analyze this Viral YouTube Transcript:
-    """
-    ${transcript}
-    """
+You are an expert YouTube Script Consultant. Your goal is to deconstruct viral videos to understand WHY they work.
 
-    1. Analyze the Hook, Pacing, Retention techniques, Tone, and Viral Factors.
-    2. Suggest 4 distinct, high-potential topics that would work well with this script's structure. 
-       - If it's a storytelling script, suggest compelling stories.
-       - If it's educational, suggest popular "how-to" or "explained" topics.
-       - The topics should be catchy and diverse.
+Analyze this Viral YouTube Transcript:
+"""
+${transcript}
+"""
 
-    Output JSON with this schema:
-    {
-      "analysis": {
-        "hookStrategy": "string",
-        "pacingStructure": "string",
-        "retentionTechniques": ["string"],
-        "toneAndStyle": "string",
-        "viralFactors": ["string"]
-      },
-      "suggestedTopics": ["string", "string", "string", "string"]
-    }
-  `;
+1. Analyze the Hook, Pacing, Retention techniques, Tone, and Viral Factors.
+2. Suggest 4 distinct, high-potential topics that would work well with this script's structure. 
+   - If it's a storytelling script, suggest compelling stories.
+   - If it's educational, suggest popular "how-to" or "explained" topics.
+   - The topics should be catchy and diverse.
 
-  const result = await model.generateContent({
+Output JSON with this schema:
+{
+  "analysis": {
+    "hookStrategy": "string",
+    "pacingStructure": "string",
+    "retentionTechniques": ["string"],
+    "toneAndStyle": "string",
+    "viralFactors": ["string"]
+  },
+  "suggestedTopics": ["string", "string", "string", "string"]
+}
+`;
+
+  const result = await ai.generateContent({
+    model: "gemini-pro",
     contents: [{ role: 'user', parts: [{ text: prompt }] }],
     generationConfig: {
       responseMimeType: "application/json",
     }
   });
 
-  const response = result.response;
-  if (!response.text()) throw new Error("No response from Gemini");
-  return JSON.parse(response.text()) as AnalysisResponse;
+  if (!result.text) throw new Error("No response from Gemini");
+  return JSON.parse(result.text) as AnalysisResponse;
 };
 
 export const generateScript = async (apiKey: string, originalTranscript: string, topic: string): Promise<ScriptResponse> => {
@@ -69,52 +67,51 @@ export const generateScript = async (apiKey: string, originalTranscript: string,
   }
 
   const ai = new GoogleGenAI({ apiKey });
-  const model = ai.getGenerativeModel({ 
-    model: "gemini-pro",
-    systemInstruction: GENERATION_SYSTEM_INSTRUCTION,
-  });
 
   const prompt = `
-    Original Viral Transcript (Template):
-    """
-    ${originalTranscript}
-    """
+You are a creative YouTube Scriptwriter. Your task is to take a "New Topic" and write a script by cloning the structural formula of an "Original Transcript".
 
-    New Topic to write about:
-    """
-    ${topic}
-    """
+Original Viral Transcript (Template):
+"""
+${originalTranscript}
+"""
 
-    Write a FULL script for the new topic. 
-    - Match the exact length and section breakdown of the original.
-    - If the original tells a joke at 0:30, the new one should too.
-    - If the original uses a fast montage at 1:00, the new one should too.
-    
-    Output JSON with this schema:
-    {
-      "newScript": {
-        "title": "string",
-        "targetAudience": "string",
-        "sections": [
-          {
-            "sectionName": "string",
-            "visualCue": "string",
-            "audioScript": "string",
-            "estimatedDuration": "string"
-          }
-        ]
+New Topic to write about:
+"""
+${topic}
+"""
+
+Write a FULL script for the new topic. 
+- Match the exact length and section breakdown of the original.
+- If the original tells a joke at 0:30, the new one should too.
+- If the original uses a fast montage at 1:00, the new one should too.
+- Language: Korean (Hangul).
+
+Output JSON with this schema:
+{
+  "newScript": {
+    "title": "string",
+    "targetAudience": "string",
+    "sections": [
+      {
+        "sectionName": "string",
+        "visualCue": "string",
+        "audioScript": "string",
+        "estimatedDuration": "string"
       }
-    }
-  `;
+    ]
+  }
+}
+`;
 
-  const result = await model.generateContent({
+  const result = await ai.generateContent({
+    model: "gemini-pro",
     contents: [{ role: 'user', parts: [{ text: prompt }] }],
     generationConfig: {
       responseMimeType: "application/json",
     }
   });
 
-  const response = result.response;
-  if (!response.text()) throw new Error("No response from Gemini");
-  return JSON.parse(response.text()) as ScriptResponse;
+  if (!result.text) throw new Error("No response from Gemini");
+  return JSON.parse(result.text) as ScriptResponse;
 };
