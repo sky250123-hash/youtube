@@ -1,4 +1,4 @@
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { AnalysisResponse, ScriptResponse } from "../types";
 
 const ANALYSIS_SYSTEM_INSTRUCTION = `
@@ -20,8 +20,8 @@ export const analyzeTranscript = async (apiKey: string, transcript: string): Pro
     throw new Error('⚠️ API 키를 입력해주세요. 오른쪽 상단의 API Key 설정에서 설정할 수 있습니다.');
   }
 
-  const ai = new GoogleGenAI({ apiKey });
-  const model = ai.model("gemini-pro");
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
   const prompt = `
 You are an expert YouTube Script Consultant. Your goal is to deconstruct viral videos to understand WHY they work.
@@ -51,7 +51,7 @@ Output JSON with this schema:
 `;
 
   const result = await model.generateContent(prompt);
-  const response = await result.response;
+  const response = result.response;
   
   if (!response.text()) throw new Error("No response from Gemini");
   return JSON.parse(response.text()) as AnalysisResponse;
@@ -62,8 +62,8 @@ export const generateScript = async (apiKey: string, originalTranscript: string,
     throw new Error('⚠️ API 키를 입력해주세요. 오른쪽 상단의 API Key 설정에서 설정할 수 있습니다.');
   }
 
-  const ai = new GoogleGenAI({ apiKey });
-  const model = ai.model("gemini-pro");
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
   const prompt = `
 You are a creative YouTube Scriptwriter. Your task is to take a "New Topic" and write a script by cloning the structural formula of an "Original Transcript".
@@ -102,7 +102,7 @@ Output JSON with this schema:
 `;
 
   const result = await model.generateContent(prompt);
-  const response = await result.response;
+  const response = result.response;
   
   if (!response.text()) throw new Error("No response from Gemini");
   return JSON.parse(response.text()) as ScriptResponse;
