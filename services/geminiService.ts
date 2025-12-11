@@ -21,6 +21,10 @@ export const analyzeTranscript = async (apiKey: string, transcript: string): Pro
   }
 
   const ai = new GoogleGenAI({ apiKey });
+  const model = ai.getGenerativeModel({ 
+    model: "gemini-1.5-flash",
+    systemInstruction: ANALYSIS_SYSTEM_INSTRUCTION,
+  });
 
   const prompt = `
     Analyze this Viral YouTube Transcript:
@@ -34,50 +38,29 @@ export const analyzeTranscript = async (apiKey: string, transcript: string): Pro
        - If it's educational, suggest popular "how-to" or "explained" topics.
        - The topics should be catchy and diverse.
 
-    Output JSON.
+    Output JSON with this schema:
+    {
+      "analysis": {
+        "hookStrategy": "string",
+        "pacingStructure": "string",
+        "retentionTechniques": ["string"],
+        "toneAndStyle": "string",
+        "viralFactors": ["string"]
+      },
+      "suggestedTopics": ["string", "string", "string", "string"]
+    }
   `;
 
-  const response = await ai.models.generateContent({
-    model: "gemini-1.5-flash-002",
-    contents: prompt,
-    config: {
-      systemInstruction: ANALYSIS_SYSTEM_INSTRUCTION,
+  const result = await model.generateContent({
+    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    generationConfig: {
       responseMimeType: "application/json",
-      responseSchema: {
-        type: Type.OBJECT,
-        properties: {
-          analysis: {
-            type: Type.OBJECT,
-            properties: {
-              hookStrategy: { type: Type.STRING, description: "Analysis of the opening hook" },
-              pacingStructure: { type: Type.STRING, description: "How the video flows speed-wise" },
-              retentionTechniques: { 
-                type: Type.ARRAY, 
-                items: { type: Type.STRING },
-                description: "List of tricks used to keep viewers watching"
-              },
-              toneAndStyle: { type: Type.STRING, description: "The emotional vibe of the script" },
-              viralFactors: {
-                type: Type.ARRAY,
-                items: { type: Type.STRING },
-                description: "Key reasons this script likely went viral"
-              }
-            },
-            required: ["hookStrategy", "pacingStructure", "retentionTechniques", "toneAndStyle", "viralFactors"]
-          },
-          suggestedTopics: {
-            type: Type.ARRAY,
-            items: { type: Type.STRING },
-            description: "4 viral topic suggestions based on the analysis"
-          }
-        },
-        required: ["analysis", "suggestedTopics"]
-      }
     }
   });
 
-  if (!response.text) throw new Error("No response from Gemini");
-  return JSON.parse(response.text) as AnalysisResponse;
+  const response = result.response;
+  if (!response.text()) throw new Error("No response from Gemini");
+  return JSON.parse(response.text()) as AnalysisResponse;
 };
 
 export const generateScript = async (apiKey: string, originalTranscript: string, topic: string): Promise<ScriptResponse> => {
@@ -86,6 +69,10 @@ export const generateScript = async (apiKey: string, originalTranscript: string,
   }
 
   const ai = new GoogleGenAI({ apiKey });
+  const model = ai.getGenerativeModel({ 
+    model: "gemini-1.5-flash",
+    systemInstruction: GENERATION_SYSTEM_INSTRUCTION,
+  });
 
   const prompt = `
     Original Viral Transcript (Template):
@@ -103,45 +90,31 @@ export const generateScript = async (apiKey: string, originalTranscript: string,
     - If the original tells a joke at 0:30, the new one should too.
     - If the original uses a fast montage at 1:00, the new one should too.
     
-    Output JSON.
+    Output JSON with this schema:
+    {
+      "newScript": {
+        "title": "string",
+        "targetAudience": "string",
+        "sections": [
+          {
+            "sectionName": "string",
+            "visualCue": "string",
+            "audioScript": "string",
+            "estimatedDuration": "string"
+          }
+        ]
+      }
+    }
   `;
 
-  const response = await ai.models.generateContent({
-    model: "gemini-1.5-flash-002",
-    contents: prompt,
-    config: {
-      systemInstruction: GENERATION_SYSTEM_INSTRUCTION,
+  const result = await model.generateContent({
+    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    generationConfig: {
       responseMimeType: "application/json",
-      responseSchema: {
-        type: Type.OBJECT,
-        properties: {
-          newScript: {
-            type: Type.OBJECT,
-            properties: {
-              title: { type: Type.STRING, description: "Clickbait-worthy title for the new video" },
-              targetAudience: { type: Type.STRING },
-              sections: {
-                type: Type.ARRAY,
-                items: {
-                  type: Type.OBJECT,
-                  properties: {
-                    sectionName: { type: Type.STRING, description: "e.g., Hook, Body 1, Climax" },
-                    visualCue: { type: Type.STRING, description: "Description of what should be on screen" },
-                    audioScript: { type: Type.STRING, description: "What the narrator says" },
-                    estimatedDuration: { type: Type.STRING, description: "e.g., '0:00 - 0:15'" }
-                  },
-                  required: ["sectionName", "visualCue", "audioScript", "estimatedDuration"]
-                }
-              }
-            },
-            required: ["title", "targetAudience", "sections"]
-          }
-        },
-        required: ["newScript"]
-      }
     }
   });
 
-  if (!response.text) throw new Error("No response from Gemini");
-  return JSON.parse(response.text) as ScriptResponse;
+  const response = result.response;
+  if (!response.text()) throw new Error("No response from Gemini");
+  return JSON.parse(response.text()) as ScriptResponse;
 };
