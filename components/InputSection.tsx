@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { AppStep } from '../types';
 
 interface InputSectionProps {
@@ -6,7 +6,7 @@ interface InputSectionProps {
   appStep: AppStep;
 }
 
-export const InputSection: React.FC<InputSectionProps> = ({ onAnalyze, appStep }) => {
+export const InputSection = ({ onAnalyze, appStep }: InputSectionProps) => {
   const [transcript, setTranscript] = useState('');
 
   const isBtnDisabled = appStep === AppStep.ANALYZING || !transcript.trim();

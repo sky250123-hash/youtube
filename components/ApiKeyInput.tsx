@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 interface ApiKeyInputProps {
   onApiKeyChange: (apiKey: string) => void;
@@ -6,7 +6,7 @@ interface ApiKeyInputProps {
 
 const STORAGE_KEY = 'gemini_api_key';
 
-export const ApiKeyInput: React.FC<ApiKeyInputProps> = ({ onApiKeyChange }) => {
+export const ApiKeyInput = ({ onApiKeyChange }: ApiKeyInputProps) => {
   const [apiKey, setApiKey] = useState('');
   const [isVisible, setIsVisible] = useState(false);
   const [rememberKey, setRememberKey] = useState(false);

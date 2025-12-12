@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { analyzeTranscript, generateScript } from './services/geminiService';
 import { AppStep, AnalysisResponse, ScriptResponse } from './types';
 import { ApiKeyInput } from './components/ApiKeyInput';
@@ -6,7 +6,7 @@ import { InputSection } from './components/InputSection';
 import { TopicSelector } from './components/TopicSelector';
 import { ResultDisplay } from './components/ResultDisplay';
 
-const App: React.FC = () => {
+const App = () => {
   const [step, setStep] = useState<AppStep>(AppStep.INPUT);
   const [apiKey, setApiKey] = useState<string>('');
   const [transcript, setTranscript] = useState<string>('');
